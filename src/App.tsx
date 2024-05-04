@@ -1,8 +1,9 @@
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, useCallback, useEffect, useState } from "react";
 
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { fetchFile, toBlobURL } from "@ffmpeg/util";
-import { UploadVideo } from "./components/upload-video";
+import { UploadVideo } from "src/components/upload-video";
+import { Timeline } from "src/components/timeline";
 
 const ffmpeg = new FFmpeg();
 
@@ -14,8 +15,7 @@ function App() {
   const [timelineVideos, setTimelineVideos] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  console.log("render");
-  async function loadFFmpeg() {
+  const loadFFmpeg = useCallback(async () => {
     const baseURL = "https://unpkg.com/@ffmpeg/core-mt@0.12.6/dist/esm";
     await ffmpeg.load({
       coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, "text/javascript"),
@@ -29,17 +29,18 @@ function App() {
       ),
     });
     setReady(true);
-  }
+  }, []);
 
-  function handleChangeVideo(e: ChangeEvent<HTMLInputElement>) {
+  const handleChangeVideo = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.item(0);
     if (!file) return;
     setVideo(file);
     setVideoPreview(URL.createObjectURL(file));
     splitVideoInChunks(file);
-  }
+  }, []);
 
   const splitVideoInChunks = async (video: File) => {
+    console.log("splited again");
     try {
       if (!video) return;
       setIsLoading(true);
@@ -106,16 +107,7 @@ function App() {
                 src={videoPreview}
               ></video>
 
-              <div className="flex items-center w-fit rounded-md overflow-hidden bg-black">
-                {timelineVideos.map((video) => (
-                  <video
-                    key={video}
-                    className="h-12 w-full object-contain"
-                    width={350}
-                    src={video}
-                  ></video>
-                ))}
-              </div>
+              <Timeline chunks={timelineVideos} />
             </div>
           ) : null}
 
