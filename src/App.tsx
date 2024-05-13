@@ -47,7 +47,8 @@ function App() {
 
       const inputPath = video.name;
       const outputPath = `temp/output%03d.mp4`;
-      const segmentDurationSeconds = "00:00:02"; // Duration of each segment in seconds
+
+      const segmentDurationSeconds = Math.ceil(8 / 1000); // Duration of each segment in seconds
 
       const file = await fetchFile(video);
       await ffmpeg.createDir("temp");
@@ -64,6 +65,7 @@ function App() {
 
       const files = await ffmpeg.listDir("temp");
 
+      console.log(files);
       const chunkFiles = [];
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
@@ -98,20 +100,19 @@ function App() {
   return (
     <div className="h-screen w-screen flex items-center justify-center">
       <div className="flex flex-col items-center">
-        <div className="space-y-4">
+        <div className="space-y-4  max-w-[450px] w-[450px]">
           {video ? (
-            <div className="space-y-2">
+            <div className="max-w-[450px] w-[450px]">
               <video
-                className="bg-black rounded-md h-[300px] w-[600px]"
-                width={600}
+                controls
+                width={450}
+                className="object-contain rounded-md"
                 src={videoPreview}
               ></video>
-
-              <Timeline chunks={timelineVideos} />
             </div>
           ) : null}
 
-          {isLoading ? <p>loading video...</p> : null}
+          <Timeline chunks={timelineVideos} />
 
           <UploadVideo onChange={handleChangeVideo} />
         </div>

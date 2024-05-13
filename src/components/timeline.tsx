@@ -1,5 +1,6 @@
-import { memo, useEffect, useRef } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import { GripVerticalIcon } from "lucide-react";
+import { classnames } from "src/lib/cn";
 
 type TimelineProps = {
   chunks: string[];
@@ -74,51 +75,6 @@ export const Timeline = memo(({ chunks }: TimelineProps) => {
     }
   }
 
-  function dragElementBound(element: HTMLElement) {
-    closeDragElement();
-    let pos1 = 0;
-
-    if (!element) return;
-
-    element.onmousedown = dragMouseDown;
-
-    function dragMouseDown(e: globalThis.MouseEvent) {
-      e.preventDefault();
-      pos1 = e.clientX;
-      document.onmouseup = closeDragElement;
-      document.onmousemove = elementDrag;
-    }
-
-    function elementDrag(e: globalThis.MouseEvent) {
-      e.preventDefault();
-      const boundElement = document.getElementById("timeline-bound");
-      if (!boundElement) return;
-
-      const parentElementWidth = Number(
-        boundElement.parentElement?.offsetWidth
-      );
-      const rightBound = (parentElementWidth - element.clientWidth) as number;
-      const leftBound = 0;
-
-      const pos2 = pos1 - e.clientX;
-
-      pos1 = e.clientX;
-
-      const newPosition = boundElement.offsetLeft - pos2;
-
-      if (newPosition >= rightBound + 1 || newPosition <= leftBound - 1) {
-        return;
-      }
-
-      boundElement.style.left = `${newPosition}px`;
-    }
-
-    function closeDragElement() {
-      document.onmouseup = null;
-      document.onmousemove = null;
-    }
-  }
-
   useEffect(() => {
     const lefthand = document.getElementById("left-hand");
     const righthand = document.getElementById("right-hand");
@@ -141,11 +97,11 @@ export const Timeline = memo(({ chunks }: TimelineProps) => {
         ref={timelineBoundRef}
         className="absolute cursor-pointer w-full z-10 right-0 left-0 inset-0"
       >
-        <div
+        {/* <div
           id="timeline-borders"
           ref={timelineBoundBordersRef}
-          className="border-4 border-white shadow-2xl rounded-l-md rounded-r-md"
-        />
+          className="border-4 border-white shadow-2xl w-fit rounded-l-md rounded-r-md"
+        /> */}
 
         <div
           id="left-hand"
@@ -154,6 +110,13 @@ export const Timeline = memo(({ chunks }: TimelineProps) => {
         >
           <GripVerticalIcon className="transition-opacity opacity-0 group-hover:opacity-100" />
         </div>
+
+        <div
+          id="timeline-borders"
+          ref={timelineBoundBordersRef}
+          className="border-4 border-white shadow-2xl w-fit rounded-l-md rounded-r-md"
+        />
+
         <div
           id="right-hand"
           ref={rightHandRef}
@@ -166,8 +129,7 @@ export const Timeline = memo(({ chunks }: TimelineProps) => {
       {chunks.map((chunk) => (
         <video
           key={chunk}
-          className="h-20 w-full z-0 object-contain"
-          width={350}
+          className={classnames(`w-[90px] h-[90px]`, "z-0  object-cover")}
           src={chunk}
         />
       ))}
